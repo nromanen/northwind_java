@@ -1,0 +1,58 @@
+name: Running Tests
+
+on: [push]
+
+permissions:
+  checks: write
+
+jobs:
+  Test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres
+
+        env:
+          POSTGRES_PASSWORD: mypass
+          POSTGRES_USER: myuser
+          POSTGRES_DB: example
+
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - run: |
+          sudo apt-get update && sudo apt-get install --yes --no-install-recommends postgresql-client
+#      - run: |
+#          psql -h localhost -U myuser -d example -c 'create table categories (id bigserial primary key, avatar varchar not null, title varchar not null);'
+        env:
+          PGPASSWORD: mypass
+      - uses: actions/checkout@v4
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: 'temurin'
+          cache: 'maven'
+      - name: Test with Maven
+        run: mvn clean test
+      - name: New Report
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Maven Tests
+          path: target/surefire-reports/*.xml
+          reporter: java-junit
+          fail-on-error: true
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v4
+        if: success() || failure()
+        with:
+          report_paths: '**/target/surefire-reports/TEST-*.xml'
+

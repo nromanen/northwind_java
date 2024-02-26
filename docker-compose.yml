@@ -1,0 +1,46 @@
+version: '4'
+
+services:
+  db:
+    image: postgres:latest
+#    container_name: db
+    environment:
+      POSTGRES_DB: example
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypass
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/da
+#    networks:
+#      - db
+
+  maven:
+#    image: speak_ukraine_param-maven
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/usr/src/mymaven
+      - ./db_docker.properties:/usr/src/mymaven/src/test/resources/db.properties
+#    networks:
+#      - db
+    depends_on:
+      - db
+#networks:
+#  db:
+#    driver: bridge
+
+
+#  maven:
+#    image: maven:latest
+#    volumes:
+#      - ./speak_ukraine_param:/usr/src/mymaven
+#    working_dir: /usr/src/mymaven
+#    command: mvn test
+#    depends_on:
+#      - postgres
+
+volumes:
+  postgres_data:
+

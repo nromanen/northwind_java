@@ -1,0 +1,3 @@
+tableName,columnName,columnType
+categories,id,bigint
+categories,avatar,character varying
