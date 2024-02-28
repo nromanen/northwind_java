@@ -50,9 +50,9 @@ jobs:
           path: target/surefire-reports/*.xml
           reporter: java-junit
           fail-on-error: true
-      - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v4
-        if: success() || failure()
-        with:
-          report_paths: '**/target/surefire-reports/TEST-*.xml'
+#      - name: Publish Test Report
+#        uses: mikepenz/action-junit-report@v4
+#        if: success() || failure()
+#        with:
+#          report_paths: '**/target/surefire-reports/TEST-*.xml'
 

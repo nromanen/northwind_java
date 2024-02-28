@@ -1,6 +1,0 @@
-tableName,columnName,columnType
-clubs,id,bigint
-clubs,title,character varying
-clubs,description,character varying
-clubs,image_url,character varying
-clubs,category_id,bigint

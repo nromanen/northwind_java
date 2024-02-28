@@ -1,0 +1,9 @@
+tableName,columnName,columnType
+cars,id,bigint
+cars,brand,character varying
+cars,manufacturer,character varying
+cars,number,character varying
+cars,type,USER-DEFINED
+cars,color,character varying
+cars,seats_amount,smallint
+cars,cost_per_day,numeric

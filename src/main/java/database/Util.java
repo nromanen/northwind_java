@@ -88,7 +88,7 @@ public class Util {
 
             while ((line = bufferedReader.readLine()) != null) {
                 lineNumber += 1;
-                line = line.trim();
+                //line = line.trim();
 
                 if (line.isEmpty() || line.startsWith("--"))
                     continue;
@@ -131,12 +131,12 @@ public class Util {
                 "FROM information_schema.columns WHERE table_name = '%s' and column_name = '%s';", tableName, columnName));
     }
 
-    public String getPK(String tableName) throws SQLException {
-        return executeQueryOneString(String.format("SELECT pg_attribute.attname\n" +
+    public List<String> getPKs(String tableName) throws SQLException {
+        return executeQueryListString(String.format("SELECT pg_attribute.attname\n" +
                 "    FROM pg_class, pg_attribute, pg_index\n" +
                 "    WHERE pg_class.oid = pg_attribute.attrelid AND\n" +
                 "    pg_class.oid = pg_index.indrelid AND\n" +
-                "    pg_index.indkey[0] = pg_attribute.attnum AND\n" +
+                "    pg_attribute.attnum in (pg_index.indkey[0], pg_index.indkey[1]) AND\n" +
                 "    pg_index.indisprimary = 't' and pg_class.relname = '%s';", tableName));
     }
 
@@ -162,10 +162,23 @@ public class Util {
                 "    );", tableName));
     }
 
+    public List<String> getCheckConstraints(String tableName) throws SQLException {
+        return executeQueryListString(String.format("SELECT pg_catalog.pg_get_constraintdef(r.oid, true) as def\n" +
+                "FROM pg_catalog.pg_constraint r\n" +
+                "WHERE r.conrelid = '%s'::regclass AND r.contype = 'c';", tableName));
+    }
+
     public boolean isColumnInTableExist(String tableName, String columnName) throws SQLException {
         return executeQueryOneBoolean("SELECT EXISTS (SELECT 1\n" +
                 "               FROM information_schema.columns\n" +
                 "               WHERE table_schema='public' AND table_name='" + tableName + "' AND column_name='" + columnName + "');");
     }
+
+    public boolean isTypeExist(String typeName) throws SQLException {
+        return executeQueryOneBoolean(String.format("select EXISTS (SELECT 1 FROM pg_type WHERE typname = '%s');", typeName));
+    }
+
+
+
 }
 

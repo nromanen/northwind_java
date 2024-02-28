@@ -10,4 +10,4 @@ COPY . /usr/src/mymaven
 RUN mvn dependency:go-offline
 
 # Specify the default command to run when the container starts
-CMD ["mvn", "test"]
+CMD ["mvn", "mvn clean surefire-report:report"]

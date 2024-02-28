@@ -1,5 +1,0 @@
-tableName,columnName,columnType
-children,id,bigint
-children,first_name,character varying
-children,last_name,character varying
-children,birth_date,date

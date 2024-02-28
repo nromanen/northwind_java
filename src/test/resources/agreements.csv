@@ -1,0 +1,6 @@
+tableName,columnName,columnType
+agreements,car_id,bigint
+agreements,customer_id,bigint
+agreements,start_date,date
+agreements,end_date,date
+agreements,total_price,numeric

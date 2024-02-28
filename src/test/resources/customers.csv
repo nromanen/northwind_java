@@ -1,0 +1,5 @@
+tableName,columnName,columnType
+customers,id,bigint
+customers,first_name,character varying
+customers,last_name,character varying
+customers,phone_number,character varying

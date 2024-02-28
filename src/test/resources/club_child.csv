@@ -1,3 +1,0 @@
-tableName,columnName,columnType
-club_child,club_id,bigint
-club_child,child_id,bigint
