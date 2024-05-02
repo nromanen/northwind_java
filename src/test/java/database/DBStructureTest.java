@@ -7,16 +7,14 @@ import org.junit.jupiter.params.provider.*;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class DBStructureSolutionTest {
+class DBStructureTest {
     private static boolean allColumnsExists = false;
     private static Util util;
 
@@ -26,42 +24,22 @@ class DBStructureSolutionTest {
         util.executeFile("init.sql");
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"cars", "customers", "agreements"})
+    @ParameterizedTest(name = "{0}")
+    @ValueSource(strings = {"employees"})
     void existTable(String tableName) throws SQLException {
         boolean actual = util.isTableExist(tableName);
         assertEquals(true, actual, "Table " + tableName + " doesn't exists");
     }
 
-
-    @Order(1)
-    @ParameterizedTest
-    @CsvFileSource(resources = {"/cars.csv", "/customers.csv", "/agreements.csv"}, numLinesToSkip = 1)
-    void existColumn(String tableName, String columnName) throws SQLException {
-        boolean actual = util.isColumnInTableExist(tableName, columnName);
-        assertEquals(true, actual, "Column " + columnName + " in table " + tableName + " doesn't exists");
-        allColumnsExists = true;
-    }
-
-    @Order(2)
-    @ParameterizedTest
-    @CsvFileSource(resources = {"/cars.csv", "/customers.csv", "/agreements.csv"}, numLinesToSkip = 1)
-    void columnType(String tableName, String columnName, String columnType) throws SQLException {
-        assumeTrue(allColumnsExists, "Skipping test for columns type because some tests for presence columns failed.");
-
-        String actual = util.getColumnType(tableName, columnName);
-        assertEquals(columnType, actual, String.format("Type for column %s should be %s", columnName, columnType));
-    }
-
-    @ParameterizedTest
-    @CsvSource({"id,customers", "id,cars", "customer_id,agreements", "car_id,agreements"})
+    @ParameterizedTest(name = "PK `{0}` for `{1}`")
+    @CsvSource({"employee_id,employees", "product_id,products"})
     void checkPK(String PKName, String tableName) throws SQLException {
         List<String> actual = util.getPKs(tableName);
 
         assertTrue(actual.contains(PKName), String.format("For table %s should be present PK named %s", tableName, PKName));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "FK `{1}` for `{0}`")
     @MethodSource
     void checkFKs(String tableName, List<String> expected) throws SQLException {
         List<String> actual = util.getFKs(tableName);
@@ -75,40 +53,25 @@ class DBStructureSolutionTest {
 
     private static Stream<Arguments> checkFKs() {
         return Stream.of(
-                Arguments.of("agreements", List.of("REFERENCES cars", "REFERENCES customers"))
+                Arguments.of("products", List.of("REFERENCES categories"))
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("forCheckNotNull")
-    void checkNotNull(String tableName, List<String> columnNames) throws SQLException {
-        List<String> actual = util.getNotNull(tableName);
-        assertThat(actual).containsAnyElementsOf(columnNames);
-    }
-
-    private static Stream<Arguments> forCheckNotNull() {
-        return Stream.of(
-                Arguments.of("customers", List.of("first_name", "last_name")),
-                Arguments.of("agreements", List.of("start_date")),
-                Arguments.of("cars", List.of("brand", "manufacturer", "color", "seats_amount"))
-        );
-    }
-
-    @ParameterizedTest
-    @CsvSource({"customers,first_name", "customers,last_name", "agreements,start_date",
-            "cars,brand", "cars,manufacturer", "cars,color", "cars,seats_amount"})
+    @ParameterizedTest(name = "not null `{1}` for `{0}`")
+    @CsvSource({"products,discontinued"})
     void checkNotNull(String tableName, String columnName) throws SQLException {
         List<String> actual = util.getNotNull(tableName);
         assertTrue(actual.contains(columnName), String.format("Column %s in table %s should be not null", columnName, tableName));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "unique `{1}` for `{0}`")
     @CsvSource({"customers, phone_number", "cars, number"})
     void checkUnique(String tableName, String columnName) throws SQLException {
         List<String> actual = util.getUnique(tableName);
         assertTrue(actual.contains(columnName), String.format("Column %s in table %s should be unique", columnName, tableName));
     }
 
+    @DisplayName("`car_type` presents")
     @Test
     void checkType() throws SQLException {
         String typeName = "car_type";
